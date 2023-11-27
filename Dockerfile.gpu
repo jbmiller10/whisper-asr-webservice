@@ -28,13 +28,18 @@ WORKDIR /app
 COPY poetry.lock pyproject.toml ./
 
 RUN poetry config virtualenvs.in-project true
-RUN poetry install --no-root
+RUN poetry install --no-root --no-dev
 
 COPY . .
 COPY --from=swagger-ui /usr/share/nginx/html/swagger-ui.css swagger-ui-assets/swagger-ui.css
 COPY --from=swagger-ui /usr/share/nginx/html/swagger-ui-bundle.js swagger-ui-assets/swagger-ui-bundle.js
 
-RUN poetry install
-RUN $POETRY_VENV/bin/pip install torch==1.13.0+cu117 -f https://download.pytorch.org/whl/torch
+# No need to run "poetry install" again as we've installed the dependencies above 
+# RUN poetry install
+
+# PyTorch should already be specified in your `pyproject.toml`. If not, you can add it there,
+# But if you want to specify the PyTorch version here, it can be done like this:
+# RUN $POETRY_VENV/bin/pip install torch==1.13.0+cu117 -f https://download.pytorch.org/whl/torch
+# I would recommend specifying it in `pyproject.toml` for better dependency management
 
 CMD gunicorn --bind 0.0.0.0:9000 --workers 1 --timeout 0 app.webservice:app -k uvicorn.workers.UvicornWorker
