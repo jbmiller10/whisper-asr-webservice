@@ -22,7 +22,6 @@ jobs:
         docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
     - name: Build the docker image
       run: docker build . --file Dockerfile.gpu --tag jbmiller10/whisper-web-diarize:(date +%s)
-test:$(date +%s)
-  - name: Docker Push
-    run: docker push ${{secrets.DOCKER_USER}}/whisper-web-diarize
+    - name: Docker Push
+      run: docker push ${{secrets.DOCKER_USER}}/whisper-web-diarize
       
