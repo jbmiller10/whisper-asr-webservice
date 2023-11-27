@@ -40,6 +40,7 @@ torch = [
 
 # The torch dependencies are unchanged here, but consider updating them globally for GPU compatibility
 pyannote-audio = "^2.0"
+pydub = "^0.25.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
