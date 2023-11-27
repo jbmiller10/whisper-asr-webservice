@@ -10,6 +10,8 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import StreamingResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from whisper import tokenizer
+from pyannote.audio import Pipeline
+from pydub import AudioSegment
 
 ASR_ENGINE = os.getenv("ASR_ENGINE", "openai_whisper")
 if ASR_ENGINE == "faster_whisper":
@@ -19,6 +21,10 @@ else:
 
 SAMPLE_RATE = 16000
 LANGUAGE_CODES = sorted(list(tokenizer.LANGUAGES.keys()))
+
+
+# Define the pipeline for diarization
+pipeline = Pipeline.from_pretrained('pyannote/speaker-diarization')
 
 projectMetadata = importlib.metadata.metadata('whisper-asr-webservice')
 app = FastAPI(
@@ -122,3 +128,22 @@ def load_audio(file: BinaryIO, encode=True, sr: int = SAMPLE_RATE):
         out = file.read()
 
     return np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
+
+
+def diarize_audio(file: BinaryIO):
+    audio_path = 'audio.wav'
+    with open(audio_path, 'wb') as audio_file:
+        audio_file.write(file.read())
+
+    diarization = pipeline({'uri': 'blabal', 'audio': audio_path})
+
+    diarization_data = [(segment, idx, f'SPEAKER_{idx:02}') for idx, segment in enumerate(diarization.itersegments())]
+
+    return diarization_data
+
+@app.post("/diarize", tags=["Endpoints"])
+async def diarize(
+        audio_file: UploadFile = File(...),
+):
+    diarization_result = diarize_audio(audio_file.file)
+    return diarization_result
