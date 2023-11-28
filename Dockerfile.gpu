@@ -30,6 +30,8 @@ COPY poetry.lock pyproject.toml ./
 RUN poetry config virtualenvs.in-project true
 RUN poetry install --no-root --no-dev
 
+RUN $POETRY_VENV/bin/pip install torch==1.13.0+cu118 torchaudio -f https://download.pytorch.org/whl/cu118/torch_stable.html
+
 COPY . .
 COPY --from=swagger-ui /usr/share/nginx/html/swagger-ui.css swagger-ui-assets/swagger-ui.css
 COPY --from=swagger-ui /usr/share/nginx/html/swagger-ui-bundle.js swagger-ui-assets/swagger-ui-bundle.js
