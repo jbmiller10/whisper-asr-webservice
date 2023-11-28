@@ -28,4 +28,4 @@ jobs:
         context: .
         file: Dockerfile.gpu
         push: true
-        tags: jbmiller10/whisper-web-diarize:${{ github.sha }}
+        tags: jbmiller10/whisper-web-diarize:latest
